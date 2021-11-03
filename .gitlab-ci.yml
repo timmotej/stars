@@ -1,0 +1,25 @@
+variables:
+  GIT_SSL_NO_VERIFY: "1"
+
+image: docker:latest
+
+stages:
+  - build
+  - publish
+
+build-empty:
+  stage: build
+  script:
+    - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
+    - echo "$CI_BUILD_TOKEN" | docker login -u "gitlab-ci-token"  --password-stdin $CI_REGISTRY
+    - docker build $DOCKER_BUILD_PARAMS --pull -t "${CI_REGISTRY_IMAGE}/sim-debug:$IMAGE_TAG" --file sim-debug.Dockerfile .
+    - docker build $DOCKER_BUILD_PARAMS --pull -t "${CI_REGISTRY_IMAGE}/sim:$IMAGE_TAG" --file sim.Dockerfile .
+
+publish:
+  stage: publish
+  script:
+    - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
+    - echo "$CI_BUILD_TOKEN" | docker login -u "gitlab-ci-token"  --password-stdin $CI_REGISTRY
+    - echo $IMAGE_TAG
+    - docker push "${CI_REGISTRY_IMAGE}/sim-debug:$IMAGE_TAG"
+    - docker push "${CI_REGISTRY_IMAGE}/sim:$IMAGE_TAG"

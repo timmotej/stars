@@ -1,0 +1,20 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: app-debug.Dockerfile
+    container_name: app
+    volumes:
+      - /home/timo/.ssh:/home/user/.ssh
+    ports:
+      - 8500:8085
+    networks:
+      - pynet
+    tty: True
+#    environment:
+#      LOG_FILE: /data/appd.log
+
+networks:
+  pynet:
+    driver: bridge
