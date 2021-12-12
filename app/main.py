@@ -77,6 +77,19 @@ class Stars(BaseModel):
         with open(f"{self.status_file}","w") as f:
             json.dump({"stars": self.stars, "categories": self._categories, "awards": self._awards}, f)
         return True
+    def restore(self):
+        with open(f"{self.status_file}","r") as f:
+            read_dict = json.load(f)
+        self._awards = read_dict["awards"]
+        self._categories = read_dict["categories"]
+        self.stars = read_dict["stars"]
+        return read_dict
+    @classmethod
+    def read_json_file(cls, jsonfile):
+        with open(f"{jsonfile}","r") as f:
+            read_dict = json.load(f)
+        return read_dict
+        
 
 class Git(BaseModel):
     identity: dict
@@ -101,7 +114,9 @@ class Git(BaseModel):
         return ret
 
 g = Git(identity=identity)
-#new_f = X(x=0.0)
+g.clone_repo()
+
+new_star = X(x=0.0)
 #
 @app.get("/")
 async def read_root():
@@ -110,25 +125,24 @@ async def read_root():
 # 
 #@app.get("/start/x/{x}/v/{v}/k/{k}")
 #async def start_all(x: float, v: float, k: float):
-#    new_f.curl_a('sim',f'x/{x}')
-#    new_f.curl_a('sim2',f'v/{v}')
-#    new_f.curl_a('sim3',f'k/{k}')
+#    new_star.curl_a('sim',f'x/{x}')
+#    new_star.curl_a('sim2',f'v/{v}')
+#    new_star.curl_a('sim3',f'k/{k}')
 #    sleep(5)
-#    new_f.curl_a('sim3',f'x/{x}')
+#    new_star.curl_a('sim3',f'x/{x}')
 #    return {"status": stat}
 #
-#@app.get("/check")
-#async def status():
-#    stat = new_f.get_x()
-#    return {"status": stat}
-#
-#@app.get("/x/{x}")
-#async def setx(x: float):
-#    new_f.null_all(x)
-#    return {'new_value': new_f.dict()}
-#
+@app.get("/check")
+async def status():
+    return {"status": new_star.dict()}
+
+@app.get("/restore")
+async def restore():
+    new_star.restore()
+    return {'restore': new_star.dict()}
+
 #@app.get("/v/{v}")
 #async def addx(v: float):
-#    x = new_f.set_x(v)
-#    new_f.curl_a('sim3',f'x/{x}')
-#    return {'new_value': new_f.dict()}
+#    x = new_star.set_x(v)
+#    new_star.curl_a('sim3',f'x/{x}')
+#    return {'new_value': new_star.dict()}
